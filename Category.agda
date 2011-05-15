@@ -98,16 +98,35 @@ oneMap = record
     ; Press = oneMorMapLaw
     }
 
---One : ∀{a} -> Category {a}
---One = record
---    { Obj = OneObj
---    ; Hom = \x y -> eqOneMapSetoid
---    ; Comp = record
---        { Ap = \f -> record
---            { Ap = IdObone
---            ; Press = \x y p -> p
---            }
---        ; Press = \x y p -> p
---        }
---    ; Id = OneObj
---    ; PrfAss = 
+oneMor2 : OneObj -> Map eqOneMapSetoid eqOneMapSetoid
+oneMor2 obone = oneMap
+
+oneMor2MapLaw : mapLaw eqOneMapSetoid (mapSetoid eqOneMapSetoid eqOneMapSetoid) oneMor2
+oneMor2MapLaw obone obone p obone = oneMorMapLaw obone obone p
+
+oneMap2 : Map2 eqOneMapSetoid eqOneMapSetoid eqOneMapSetoid
+oneMap2 = record
+    { Ap = oneMor2
+    ; Press = oneMor2MapLaw
+    }
+
+onePrfAss : {x y z w : OneObj} -> (f : Setoid.Carrier $ eqOneMapSetoid) -> (g : Setoid.Carrier $ eqOneMapSetoid) -> (h : Setoid.Carrier $ eqOneMapSetoid)
+    -> Setoid._≈_ eqOneMapSetoid (Map.Ap (Map.Ap oneMap2 $ Map.Ap (Map.Ap oneMap2 f) g) h) (Map.Ap (Map.Ap oneMap2 f) (Map.Ap (Map.Ap oneMap2 g) h))
+onePrfAss obone obone obone = eqob
+
+onePrfIdl : {x y : OneObj} -> (f : Setoid.Carrier $ eqOneMapSetoid) -> Setoid._≈_ eqOneMapSetoid (Map.Ap (Map.Ap oneMap2 obone) f) f
+onePrfIdl obone = eqob
+
+onePrfIdr : {x y : OneObj} -> (f : Setoid.Carrier $ eqOneMapSetoid) -> Setoid._≈_ eqOneMapSetoid (Map.Ap (Map.Ap oneMap2 f) obone) f
+onePrfIdr obone = eqob
+
+One : Category {zero}
+One = record
+    { Obj = OneObj
+    ; Hom = \x y -> eqOneMapSetoid
+    ; Comp = oneMap2
+    ; Id = obone
+    ; PrfAss = onePrfAss {obone}{obone}{obone}{obone}
+    ; PrfIdl = onePrfIdl {obone}{obone}
+    ; PrfIdr = onePrfIdr {obone}{obone}
+    }
