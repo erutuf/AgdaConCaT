@@ -12,18 +12,18 @@ open import Relation.Binary.Core
 -----------------------------------------------------------
 -- Map
 
-mapLaw : ∀ {c1 c2 ℓ1 ℓ2} (A : Setoid c1 ℓ1) -> (B : Setoid c2 ℓ2) -> (Setoid.Carrier A -> Setoid.Carrier B) -> Set (c1 ⊔ ℓ1 ⊔ ℓ2)
-mapLaw A B f = ∀ (x y : Setoid.Carrier A) -> Setoid._≈_ A x y -> Setoid._≈_ B (f x) (f y)
+MapLaw : ∀ {c1 c2 ℓ1 ℓ2} (A : Setoid c1 ℓ1) -> (B : Setoid c2 ℓ2) -> (Setoid.Carrier A -> Setoid.Carrier B) -> Set (c1 ⊔ ℓ1 ⊔ ℓ2)
+MapLaw A B f = ∀ (x y : Setoid.Carrier A) -> Setoid._≈_ A x y -> Setoid._≈_ B (f x) (f y)
 
 record Map {c1 c2 ℓ1 ℓ2} (A : Setoid c1 ℓ1) (B : Setoid c2 ℓ2) : Set (suc (c1 ⊔ c2 ⊔ ℓ1 ⊔ ℓ2)) where
     field
       Ap    : Setoid.Carrier A -> Setoid.Carrier B
-      Press : mapLaw A B Ap
+      Press : MapLaw A B Ap
 
-ext : ∀{a1 a2 b1 b2} (A : Setoid a1 b1) -> (B : Setoid a2 b2) -> Map A B -> Map A B -> Set (a1 ⊔ b2)
-ext A B F G = ∀ (x : Setoid.Carrier A) -> Setoid._≈_ B (Map.Ap F x) (Map.Ap G x) 
+Ext : ∀{a1 a2 b1 b2} (A : Setoid a1 b1) -> (B : Setoid a2 b2) -> Map A B -> Map A B -> Set (a1 ⊔ b2)
+Ext A B F G = ∀ (x : Setoid.Carrier A) -> Setoid._≈_ B (Map.Ap F x) (Map.Ap G x) 
 
-extIsEquivalence : ∀{a1 a2 b1 b2} (A : Setoid a1 b1) -> (B : Setoid a2 b2) -> IsEquivalence (ext A B)
+extIsEquivalence : ∀{a1 a2 b1 b2} (A : Setoid a1 b1) -> (B : Setoid a2 b2) -> IsEquivalence (Ext A B)
 extIsEquivalence A B = record
     { refl  = \x -> IsEquivalence.refl (Setoid.isEquivalence B)
     ; sym   = \f x -> IsEquivalence.sym (Setoid.isEquivalence B) (f x)
@@ -33,11 +33,11 @@ extIsEquivalence A B = record
 mapSetoid : ∀{a1 a2 b1 b2} (A : Setoid a1 b1) -> (B : Setoid a2 b2) -> Setoid (suc (b2 ⊔ b1 ⊔ a2 ⊔ a1)) (b2 ⊔ a1)
 mapSetoid A B = record
     { Carrier       = Map A B
-    ; _≈_          = ext A B
+    ; _≈_          = Ext A B
     ; isEquivalence = extIsEquivalence A B
     }
 
-eqMap : ∀{a1 a2 b1 b2} (A : Setoid a1 b1) -> (B : Setoid a2 b2) -> (F G : Map A B) -> ext A B F G -> (x : Setoid.Carrier A) -> Setoid._≈_ B (Map.Ap F x) (Map.Ap G x)
+eqMap : ∀{a1 a2 b1 b2} (A : Setoid a1 b1) -> (B : Setoid a2 b2) -> (F G : Map A B) -> Ext A B F G -> (x : Setoid.Carrier A) -> Setoid._≈_ B (Map.Ap F x) (Map.Ap G x)
 eqMap A B F G F=G x = F=G x
 
 -- id on Setoid
@@ -45,7 +45,7 @@ eqMap A B F G F=G x = F=G x
 idS : ∀{c ℓ}(A : Setoid c ℓ) -> Setoid.Carrier A -> Setoid.Carrier A
 idS A x = x
 
-idSMapLaw : ∀{a b}(A : Setoid a b) -> mapLaw A A (idS A)
+idSMapLaw : ∀{a b}(A : Setoid a b) -> MapLaw A A (idS A)
 idSMapLaw A = \ x y p -> p
 
 idSMap : ∀{c ℓ}(A : Setoid c ℓ) -> Map A A
@@ -59,7 +59,7 @@ idSMap A = record
 compS : ∀{a1 a2 a3 b1 b2 b3} (A : Setoid a1 b1) -> (B : Setoid a2 b2) -> (C : Setoid a3 b3) -> Map A B -> Map B C -> Setoid.Carrier A -> Setoid.Carrier C
 compS A B C F G x = Map.Ap G (Map.Ap F x)
 
-compSMapLaw : ∀{a1 a2 a3 b1 b2 b3} (A : Setoid a1 b1) -> (B : Setoid a2 b2) -> (C : Setoid a3 b3) -> (F : Map A B) -> (G : Map B C) -> mapLaw A C (compS A B C F G)
+compSMapLaw : ∀{a1 a2 a3 b1 b2 b3} (A : Setoid a1 b1) -> (B : Setoid a2 b2) -> (C : Setoid a3 b3) -> (F : Map A B) -> (G : Map B C) -> MapLaw A C (compS A B C F G)
 compSMapLaw A B C F G = \ x y p -> Map.Press G (Map.Ap F x) (Map.Ap F y) (Map.Press F x y p)
 
 compSMap : ∀{a1 a2 a3 b1 b2 b3} (A : Setoid a1 b1) -> (B : Setoid a2 b2) -> (C : Setoid a3 b3) -> Map A B -> Map B C -> Map A C
@@ -95,7 +95,7 @@ sprodSetoid A B = record
 
 -- SProdl, SProdr are Map
 
-SProdlMapLaw : ∀{a1 b1 a2 b2} (A : Setoid a1 b1) (B : Setoid a2 b2) -> mapLaw (sprodSetoid A B) A SetoidProd.SProdl
+SProdlMapLaw : ∀{a1 b1 a2 b2} (A : Setoid a1 b1) (B : Setoid a2 b2) -> MapLaw (sprodSetoid A B) A SetoidProd.SProdl
 SProdlMapLaw A B = \x y p -> proj₁ p
 
 SProdlMap : ∀{a1 a2 b1 b2} (A : Setoid a1 b1) -> (B : Setoid a2 b2) -> Map (sprodSetoid A B) A
@@ -104,7 +104,7 @@ SProdlMap A B = record
     ; Press = SProdlMapLaw A B
     }
 
-SProdrMapLaw : ∀{a1 b1 a2 b2} (A : Setoid a1 b1) (B : Setoid a2 b2) -> mapLaw (sprodSetoid A B) B SetoidProd.SProdr
+SProdrMapLaw : ∀{a1 b1 a2 b2} (A : Setoid a1 b1) (B : Setoid a2 b2) -> MapLaw (sprodSetoid A B) B SetoidProd.SProdr
 SProdrMapLaw A B = \x y p -> proj₂ p
 
 SProdrMap : ∀{a1 a2 b1 b2} (A : Setoid a1 b1) -> (B : Setoid a2 b2) -> Map (sprodSetoid A B) B
@@ -119,7 +119,7 @@ SProdrMap A B = record
 Map2 : ∀{c1 c2 c3 ℓ1 ℓ2 ℓ3} ->  Setoid c1 ℓ1 -> Setoid c2 ℓ2 -> Setoid c3 ℓ3 -> Set (suc $ suc ℓ3 ⊔ suc ℓ2 ⊔ ℓ1 ⊔ suc c3 ⊔ suc c2 ⊔ c1)
 Map2 A B C = Map A (mapSetoid B C)
 
-map2MapLaw : ∀{a1 a2 a3 b1 b2 b3} (A : Setoid a1 b1) -> (B : Setoid a2 b2) -> (C : Setoid a3 b3) -> (F : Map2 A B C) -> (a : Setoid.Carrier A) -> mapLaw B C $ Map.Ap $  Map.Ap F a
+map2MapLaw : ∀{a1 a2 a3 b1 b2 b3} (A : Setoid a1 b1) -> (B : Setoid a2 b2) -> (C : Setoid a3 b3) -> (F : Map2 A B C) -> (a : Setoid.Carrier A) -> MapLaw B C $ Map.Ap $  Map.Ap F a
 map2MapLaw A B C F a = \x y p -> Map.Press (Map.Ap F a) x y p
 
 Ap2 : ∀{a1 a2 a3 b1 b2 b3} (A : Setoid a1 b1) -> (B : Setoid a2 b2) -> (C : Setoid a3 b3) -> (F : Map2 A B C) -> Setoid.Carrier A -> Setoid.Carrier B -> Setoid.Carrier C

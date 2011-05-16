@@ -89,7 +89,7 @@ eqOneMapSetoid = record
 oneMor : OneObj -> OneObj
 oneMor obone = obone
 
-oneMorMapLaw : mapLaw eqOneMapSetoid eqOneMapSetoid oneMor
+oneMorMapLaw : MapLaw eqOneMapSetoid eqOneMapSetoid oneMor
 oneMorMapLaw obone obone p = p
 
 oneMap : Map eqOneMapSetoid eqOneMapSetoid
@@ -101,7 +101,7 @@ oneMap = record
 oneMor2 : OneObj -> Map eqOneMapSetoid eqOneMapSetoid
 oneMor2 obone = oneMap
 
-oneMor2MapLaw : mapLaw eqOneMapSetoid (mapSetoid eqOneMapSetoid eqOneMapSetoid) oneMor2
+oneMor2MapLaw : MapLaw eqOneMapSetoid (mapSetoid eqOneMapSetoid eqOneMapSetoid) oneMor2
 oneMor2MapLaw obone obone p obone = oneMorMapLaw obone obone p
 
 oneMap2 : Map2 eqOneMapSetoid eqOneMapSetoid eqOneMapSetoid
